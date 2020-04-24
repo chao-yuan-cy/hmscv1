@@ -1,15 +1,24 @@
-from flask import Blueprint, render_template, request, jsonify,make_response
+from flask import Blueprint, request, jsonify, make_response, redirect, g
+
+from application import app
 from common.models.user import User
 from common.libs.user.UserService import UserService
+from common.libs.UrlManager import UrlManager
+from common.libs.Helper import ops_render
+
 import json
+
 router_user = Blueprint('user_page', __name__)
 
 
 @router_user.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template("user/login.html")
+        if g.current_user:
+            return redirect(UrlManager.buildUrl("/"))
+        return ops_render("user/login.html")
 
+    # POST请求
     resp = {
         'code': 200,
         'msg': '登录成功',
@@ -47,9 +56,10 @@ def login():
 
     response = make_response(json.dumps({'code': 200, 'msg': '登录成功~~~'}))
     # Cookie中存入的信息是user_info.uid,user_info
-    response.set_cookie("hmsc_1901C", "%s@%s" % (UserService.generateAuthCode(user_info), user_info.uid),60 * 60 * 24 * 15)
-
+    response.set_cookie(app.config['AUTH_COOKIE_NAME'],
+                        "%s@%s" % (UserService.generateAuthCode(user_info), user_info.uid), 60 * 60 * 24 * 15)
     return response
+
 
 @router_user.route("/logout")
 def logout():

@@ -13,7 +13,13 @@ db = SQLAlchemy()
 app = Applciation(__name__,template_folder=os.getcwd()+'/web/templates/',root_path=os.getcwd())
 manager = Manager(app)
 
-
 from common.libs.UrlManager import UrlManager
 app.add_template_global(UrlManager.buildStaticUrl,'buildStaticUrl')
 app.add_template_global(UrlManager.buildUrl,'buildUrl')
+
+
+
+
+
+
+
