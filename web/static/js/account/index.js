@@ -9,7 +9,7 @@ var account_index_ops = {
             $(".wrap_search").submit()
         })
         $(".remove").click(function(){
-            id = $(this).attr("data")
+            id = $(this).attr("data") 
             that.myAjax(id,"remove")
         })
         $(".recover").click(function(){

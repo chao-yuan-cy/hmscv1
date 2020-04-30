@@ -22,7 +22,9 @@ var user_login_ops = {
                 alert('请输入正确的密码')
                 return
             }
+
             btn_target.addClass("disabled");
+
             $.ajax({
                 url:common_ops.buildUrl("/user/login"),
                 type:"POST",
@@ -41,6 +43,8 @@ var user_login_ops = {
         })
     }
 }
+
+
 $(document).ready(function(){
     user_login_ops.init();
 })
