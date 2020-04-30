@@ -5,7 +5,6 @@ from common.libs.UrlManager import UrlManager
 from common.models.goods import Good
 from application import app,db
 from sqlalchemy import or_,DECIMAL
-
 router_goods = Blueprint("goods_page",__name__)
 
 @router_goods.route("/index")
@@ -17,7 +16,7 @@ def index():
     if 'status' in req and int(req['status']) > -1:
         query = query.filter(Good.status == int(req['status']))
     if 'mix_kw' in req:
-        rule = or_( Good.name.ilike("%{0}%".format(req['mix_kw'])), Good.tags.ilike("%{0}%".format(req['mix_kw'])) )
+        rule = or_( Good.name.ilike("%{0}%".format(req['mix_kw'])), Goods.tags.ilike("%{0}%".format(req['mix_kw'])) )
         query = query.filter(rule)
     if 'cat_id' in req and int(req['cat)id']) > 0:
         query = query.filter(Good.cat_id == int(req['cat_id']))
@@ -28,9 +27,9 @@ def index():
         "url":request.full_path.replace("&p={}".format(page),"")
     }
     pages = iPagination(params)
-    # 当前页数据开始位置
+    # 当前页数据开始位置  
     offset = (page-1) * 2
-    # 当前页数据结束位置
+    # 当前页数据结束位置  
     limit = page * 2
 
     list = query.all()[offset:limit]
@@ -92,7 +91,7 @@ def set():
         resp['code'] = -1
         resp['msg'] = "请输入符合规范的价格"
         return jsonify(resp)
-
+    
     if main_image is None or len(main_image) < 3:
         resp['code'] = -1
         resp['msg'] = "请上传封面"
@@ -102,12 +101,12 @@ def set():
         resp['code'] = -1
         resp['msg'] = "请输入商品描述，不少于10个字符"
         return jsonify(resp)
-
+    
     if stock < 1:
         resp['code'] = -1
         resp['msg'] = "请输入符合规范的库存量"
         return jsonify(resp)
-
+    
     if tags is None or len(tags) < 1:
         resp['code'] = -1
         resp['msg'] = "请输入标签，便于搜索"
@@ -117,7 +116,7 @@ def set():
     before_stock = 0
     if goods_info:
         model_goods = goods_info
-        before_stock = model_goods.stock
+        before_stock = model_goods.stock 
     else:
         model_goods = Good()
         model_goods.status = 1
@@ -133,7 +132,7 @@ def set():
     model_goods.updated_time = getCurrentDate()
 
     db.session.add(model_goods)
-    db.session.commit()
+    db.session.commit()     
     return jsonify(resp)
 
 @router_goods.route("/cat")
