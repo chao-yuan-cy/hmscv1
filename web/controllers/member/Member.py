@@ -122,7 +122,7 @@ def comment():
     resp_data['list'] = comment_list
     member_info = {
         'avatar':"",
-        'nickname':"Bruce"
+        'nickname':"cy"
     }
     for item in comment_list:
         item.member_info = member_info

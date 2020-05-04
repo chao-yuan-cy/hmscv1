@@ -1,14 +1,18 @@
-from flask import Blueprint,request,jsonify,redirect
+from decimal import Decimal
 
-from common.libs.Helper import ops_render,getCurrentDate,iPagination
+from flask import Blueprint, request, jsonify, redirect
+from sqlalchemy import or_
+from common.libs.Helper import ops_render, getCurrentDate, iPagination
 from common.libs.UrlManager import UrlManager
 from common.models.goods import Good
-from application import app,db
-from sqlalchemy import or_,DECIMAL
-router_goods = Blueprint("goods_page",__name__)
+from application import app, db
+
+router_goods = Blueprint("goods_page", __name__)
+
 
 @router_goods.route("/index")
 def index():
+
     resp_data = {}
     query = Good.query
     req = request.values
@@ -16,51 +20,63 @@ def index():
     if 'status' in req and int(req['status']) > -1:
         query = query.filter(Good.status == int(req['status']))
     if 'mix_kw' in req:
-        rule = or_( Good.name.ilike("%{0}%".format(req['mix_kw'])), Goods.tags.ilike("%{0}%".format(req['mix_kw'])) )
+        rule = or_(Good.name.ilike("%{0}%".format(req['mix_kw'])), Good.tags.ilike("%{0}%".format(req['mix_kw'])))
         query = query.filter(rule)
     if 'cat_id' in req and int(req['cat)id']) > 0:
         query = query.filter(Good.cat_id == int(req['cat_id']))
     params = {
-        "total":query.count(),
-        "page_size":2,
-        "page":page,
-        "url":request.full_path.replace("&p={}".format(page),"")
+        "total": query.count(),
+        "page_size": 2,
+        "page": page,
+        "url": request.full_path.replace("&p={}".format(page), "")
     }
     pages = iPagination(params)
-    # 当前页数据开始位置  
-    offset = (page-1) * 2
-    # 当前页数据结束位置  
+    # 当前页数据开始位置
+    offset = (page - 1) * 2
+    # 当前页数据结束位置
     limit = page * 2
 
     list = query.all()[offset:limit]
 
     resp_data['list'] = list
     resp_data['pages'] = pages
-    return ops_render("goods/index.html",resp_data)
+    return ops_render("goods/index.html", resp_data)
 
 
 @router_goods.route("/info")
 def info():
     resp_data = {}
+    req = request.args
+    id = int(req.get("id", 0))
+    reback_url = UrlManager.buildUrl("/goods/index")
+    if id < 1:
+        return redirect(reback_url)
 
-    return ops_render("goods/info.html")
+    info = Good.query.filter_by(id=id).first()
+    if not info:
+        return redirect(reback_url)
 
-@router_goods.route("/set",methods=['GET','POST'])
+    resp_data['info'] = info
+    return ops_render('goods/info.html', resp_data)
+
+
+@router_goods.route("/set", methods=['GET', 'POST'])
 def set():
+
     if request.method == "GET":
         resp_data = {}
         req = request.args
-        id = int(req.get('id',0))
+        id = int(req.get('id', 0))
         info = Good.query.filter_by(id=id).first()
         if info and info.status != 1:
             return redirect(UrlManager.buildUrl("/goods/index"))
         resp_data['info'] = info
-        return ops_render("goods/set.html",resp_data)
+        return ops_render("goods/set.html", resp_data)
     # POST
     resp = {
-        'code':200,
-        'msg':"操作成功",
-        'data':{}
+        'code': 200,
+        'msg': "操作成功",
+        'data': {}
     }
     req = request.values
     id = int(req['id']) if 'id' in req and req['id'] else 0
@@ -86,13 +102,16 @@ def set():
         resp['code'] = -1
         resp['msg'] = "请输入符合规范的价格"
         return jsonify(resp)
-    price = DECIMAL(price).quantize(DECIMAL('0.00'))
+    price = Decimal(price).quantize(Decimal('0.00'))
     if price < 0:
         resp['code'] = -1
         resp['msg'] = "请输入符合规范的价格"
         return jsonify(resp)
-    
+
     if main_image is None or len(main_image) < 3:
+        print('---------------')
+        print(main_image)
+        print(len(main_image))
         resp['code'] = -1
         resp['msg'] = "请上传封面"
         return jsonify(resp)
@@ -101,22 +120,22 @@ def set():
         resp['code'] = -1
         resp['msg'] = "请输入商品描述，不少于10个字符"
         return jsonify(resp)
-    
+
     if stock < 1:
         resp['code'] = -1
         resp['msg'] = "请输入符合规范的库存量"
         return jsonify(resp)
-    
+
     if tags is None or len(tags) < 1:
         resp['code'] = -1
         resp['msg'] = "请输入标签，便于搜索"
         return jsonify(resp)
 
-    goods_info = Good.query.filter_by(uid=id).first()
+    goods_info = Good.query.filter_by(id=id).first()
     before_stock = 0
     if goods_info:
         model_goods = goods_info
-        before_stock = model_goods.stock 
+        before_stock = model_goods.stock
     else:
         model_goods = Good()
         model_goods.status = 1
@@ -132,15 +151,15 @@ def set():
     model_goods.updated_time = getCurrentDate()
 
     db.session.add(model_goods)
-    db.session.commit()     
+    db.session.commit()
     return jsonify(resp)
+
 
 @router_goods.route("/cat")
 def cat():
     resp_data = {}
 
     return ops_render("goods/cat.html")
-
 
 
 @router_goods.route("/cat_set")

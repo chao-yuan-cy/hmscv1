@@ -15,7 +15,7 @@ def ueditor():
         config_path = "{0}\\web\\static\\plugins\\ueditor\\upload_config.json".format(root_path)
         with open(config_path) as fp:
             try:
-                conf_data = json.loads( re.sub( r'\/\*.*\*/','',fp.read() ) )
+                conf_data = json.loads(re.sub(r'\/\*.*\*/','',fp.read()))
             except:
                 conf_data = {}
         print(conf_data)

@@ -59,7 +59,7 @@
                 {% for item in list %}
             <tr>
                 <td>{{ item.name }}</td>
-                <td>{{ cat_mapping[ item.cat_id].name  }}</td>
+                <td>{{ item.cat_id  }}</td>
                 <td>{{ item.price }}</td>
                 <td>{{ item.stock }}</td>
                 <td>{{ item.tags }}</td>
@@ -68,7 +68,7 @@
                         <i class="fa fa-eye fa-lg"></i>
                     </a>
                      {%  if item.status == 1 %}
-                    <a class="m-l" href="{{ buildUrl('/good/set') }}?id={{ item.id  }}">
+                    <a class="m-l" href="{{ buildUrl('/goods/set') }}?id={{ item.id  }}">
                         <i class="fa fa-edit fa-lg"></i>
                     </a>
 
@@ -89,7 +89,7 @@
             </tbody>
         </table>
         <!--分页代码已被封装到统一模板文件中-->
-        
+
     </div>
 </div>
 {% endblock %}
